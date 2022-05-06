@@ -95,7 +95,7 @@ with open('invoke-url.json','r') as f:
 
 print(f'invoke_url:\n{invoke_url}\n')
 
-input_analyzed_path = '/home/ec2-user/environment/ControlBrokerEvalEngine-ApplicationTeam-ExampleApp/cdk.out/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
+input_analyzed_path = './input_analyzed/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
 
 with open(input_analyzed_path,'r') as f:
     input_analyzed:dict = json.loads(f.read())
