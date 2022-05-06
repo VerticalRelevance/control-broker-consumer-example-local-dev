@@ -120,7 +120,6 @@ cb_input_object = {
     "Input": input_analyzed
 }
 
-
 s = SimpleControlBrokerClient(
     invoke_url = invoke_url,
     input_bucket = input_bucket,
