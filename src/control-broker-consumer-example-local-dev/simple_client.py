@@ -61,7 +61,6 @@ class SimpleControlBrokerClient():
             m = re.search('https://(.*)/.*',full_invoke_url)
             return m.group(1)
         
-        
         host = get_host(full_invoke_url=self.invoke_url)
             
         auth = BotoAWSRequestsAuth(
@@ -115,10 +114,10 @@ input_analyzed = {
 # )
 
 cb_input_object = {
-    "ConsumerMetadata":{
-        "foo":"Bar"
+    "Context":{
+        "EnvironmentEvaluation":"Dev"
     },
-    "InputAnalyzed": input_analyzed
+    "Input": input_analyzed
 }
 
 
