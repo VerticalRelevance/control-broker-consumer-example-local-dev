@@ -108,7 +108,6 @@ input_analyzed = {
     'Key': input_analyzed_path.split('/')[-1]
 }
 
-
 put_object(
     bucket = input_analyzed['Bucket'],
     key = input_analyzed['Key'],
