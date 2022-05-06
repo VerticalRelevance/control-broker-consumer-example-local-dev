@@ -98,7 +98,7 @@ print(f'invoke_url:\n{invoke_url}\n')
 input_analyzed_path = './input_analyzed/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
 
 with open(input_analyzed_path,'r') as f:
-    input_analyzed:dict = json.loads(f.read())
+    input_analyzed_object:dict = json.loads(f.read())
 
 
 input_bucket = 'cschneider-control-broker-utils'
@@ -108,13 +108,12 @@ input_analyzed = {
     'Key': input_analyzed_path.split('/')[-1]
 }
 
+
 put_object(
     bucket = input_analyzed['Bucket'],
     key = input_analyzed['Key'],
-    object_ = input_analyzed
+    object_ = input_analyzed_object
 )
-
-
 
 cb_input_object = {
     "ConsumerMetadata":{
