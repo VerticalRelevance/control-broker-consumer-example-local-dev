@@ -64,11 +64,10 @@ def retry_get_object(*,bucket,key):
             print('sleep')
             sleep(i**2)
         else:
-            break
+            return content
     else:
         print('failed')
         
-
 class SimpleControlBrokerClient():
     
     def __init__(self,*,
@@ -124,17 +123,16 @@ class SimpleControlBrokerClient():
         
         return r
 
-
 with open('invoke-url.json','r') as f:
     invoke_url = json.loads(f.read())
 
 print(f'invoke_url:\n{invoke_url}\n')
 
-input_analyzed_path = './input_analyzed/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
+# input_analyzed_path = './input_analyzed/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
+input_analyzed_path = './input_analyzed/ConfigEvent.sqs.queue.json'
 
 with open(input_analyzed_path,'r') as f:
     input_analyzed_object:dict = json.loads(f.read())
-
 
 input_bucket = 'cschneider-control-broker-utils' # edit bucket policy to allow CB.Reader.RoleArn
 
@@ -143,11 +141,11 @@ input_analyzed = {
     'Key': input_analyzed_path.split('/')[-1]
 }
 
-# put_object(
-#     bucket = input_analyzed['Bucket'],
-#     key = input_analyzed['Key'],
-#     object_ = input_analyzed_object
-# )
+put_object(
+    bucket = input_analyzed['Bucket'],
+    key = input_analyzed['Key'],
+    object_ = input_analyzed_object
+)
 
 cb_input_object = {
     "Context":{
@@ -162,10 +160,17 @@ s = SimpleControlBrokerClient(
     input_object = cb_input_object
 )
 
-# s.put_input()
+s.put_input()
 response = s.invoke_endpoint()
 
-retry_get_object(
-    bucket = response['Content']['Response']['ResultsReport']['Buckets']['Raw'],
+raw_bucket = response['Content']['Response']['ResultsReport']['Buckets']['Raw']
+
+output_handlers = response['Content']['Response']['ResultsReport']['Buckets']['OutputHandlers']
+
+result = retry_get_object(
+    # bucket = raw_bucket,
+    bucket = [i['AccessPointArn'] for i in output_handlers if i['HandlerName'] == "CloudFormationOPA"][0],
     key = response['Content']['Response']['ResultsReport']['Key'],
 )
+
+pp(result)
