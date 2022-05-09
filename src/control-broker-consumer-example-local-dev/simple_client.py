@@ -1,5 +1,6 @@
 import json
 import re
+from time import sleep
 
 import requests
 from pprintpp import pprint as pp
@@ -31,6 +32,43 @@ def put_object(*,bucket,key,object_:dict):
         print(f'no ClientError put_object:\nbucket:\n{bucket}\nkey:\n{key}')
         return True
 
+def get_object(*,bucket,key):
+    
+    try:
+        r = s3.get_object(
+            Bucket = bucket,
+            Key = key
+        )
+    except ClientError as e:
+        print(e)
+        if e.response['ResponseMetadata']['HTTPStatusCode'] == 403:
+            print(f'403 as proxy for nonexistance, but may hide actual actual IAM issues')
+            return False
+        if e.response['ResponseMetadata']['HTTPStatusCode'] == 404:
+            return False
+        else:
+            raise
+    else:
+        print(f'no ClientError get_object:\nbucket:\n{bucket}\nkey:\n{key}')
+        body = r['Body']
+        content = json.loads(body.read().decode('utf-8'))
+        return content
+
+def retry_get_object(*,bucket,key):
+    
+    for i in range(4):
+        content = get_object(bucket=bucket,key=key)
+        try:
+            assert content
+        except AssertionError:
+            print('sleep')
+            sleep(i**2)
+        else:
+            break
+    else:
+        print('failed')
+        
+
 class SimpleControlBrokerClient():
     
     def __init__(self,*,
@@ -43,9 +81,6 @@ class SimpleControlBrokerClient():
         self.input_bucket = input_bucket
         self.input_object = input_object
         
-        self.put_input()
-        self.invoke_endpoint()
-    
         
     def put_input(self):
         
@@ -84,7 +119,8 @@ class SimpleControlBrokerClient():
             'Content': content
         }
         
-        print(f'\napigw formatted response:\n{r}')
+        print(f'\napigw formatted response:\n')
+        pp(r)
         
         return r
 
@@ -100,7 +136,7 @@ with open(input_analyzed_path,'r') as f:
     input_analyzed_object:dict = json.loads(f.read())
 
 
-input_bucket = 'cschneider-control-broker-utils'
+input_bucket = 'cschneider-control-broker-utils' # edit bucket policy to allow CB.Reader.RoleArn
 
 input_analyzed = {
     'Bucket': input_bucket,
@@ -115,7 +151,7 @@ input_analyzed = {
 
 cb_input_object = {
     "Context":{
-        "EnvironmentEvaluation":"Dev"
+        "EnvironmentEvaluation":"Prod"
     },
     "Input": input_analyzed
 }
@@ -124,4 +160,12 @@ s = SimpleControlBrokerClient(
     invoke_url = invoke_url,
     input_bucket = input_bucket,
     input_object = cb_input_object
+)
+
+# s.put_input()
+response = s.invoke_endpoint()
+
+retry_get_object(
+    bucket = response['Content']['Response']['ResultsReport']['Buckets']['Raw'],
+    key = response['Content']['Response']['ResultsReport']['Key'],
 )
