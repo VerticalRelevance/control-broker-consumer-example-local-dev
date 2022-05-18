@@ -170,8 +170,9 @@ with open('invoke-url.json','r') as f:
 
 print(f'invoke_url:\n{invoke_url}\n')
 
-input_to_be_evaluated_path = './input_analyzed/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
+# input_to_be_evaluated_path = './input_analyzed/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
 # input_to_be_evaluated_path = './input_analyzed/ConfigEvent.sqs.queue.json'
+input_to_be_evaluated_path = './cb-example-app-terraform/tfplan.json'
 
 with open(input_to_be_evaluated_path,'r') as f:
     input_to_be_evaluated_object:dict = json.loads(f.read())
