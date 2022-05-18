@@ -77,7 +77,7 @@ def retry_get_presigned(presigned):
             print('sleep')
             sleep(i**2)
         else:
-            return r.content
+            return json.loads(r.content)
     else:
         print('failed')
         
@@ -152,13 +152,13 @@ response = s.invoke_endpoint()
 
 pp(response)
 
-raw_presigned = response['ControlBrokerEvaluation']['Raw']['Bucket']
+raw_presigned = response['Response']['ControlBrokerEvaluation']['Raw']['PresignedUrl']
 
 raw_result = retry_get_presigned(raw_presigned)
 
 pp(raw_result)
 
-handled_presigned = response['ControlBrokerEvaluation']['OutputHandlers']['CloudFormationOPA']['Bucket']
+handled_presigned = response['Response']['ControlBrokerEvaluation']['OutputHandlers']['CloudFormationOPA']['PresignedUrl']
 
 handled_result = retry_get_presigned(handled_presigned)
 
