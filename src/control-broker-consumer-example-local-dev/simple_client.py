@@ -81,7 +81,7 @@ def retry_get_presigned(presigned):
     else:
         print('failed')
         
-class SimpleControlBrokerClient():
+class SimpleAwsControlBrokerClient():
     
     def __init__(self,*,
         invoke_url,
@@ -125,6 +125,46 @@ class SimpleControlBrokerClient():
         
         return content
 
+class SimpleCrossCloudControlBrokerClient():
+    
+    def __init__(self,*,
+        invoke_url,
+        input_object:dict,
+    ):
+        
+        self.invoke_url = invoke_url
+        self.input_object = input_object
+        
+    def invoke_endpoint(self):
+        
+        def get_host(*,full_invoke_url):
+            m = re.search('https://(.*)/.*',full_invoke_url)
+            return m.group(1)
+        
+        host = get_host(full_invoke_url=self.invoke_url)
+            
+        auth = 'True'
+        
+        r = requests.post(
+            self.invoke_url,
+            headers = {'Authorization':auth},
+            json = self.input_object
+        )
+        
+        print(f'headers:\n{dict(r.request.headers)}\n')
+        
+        content = json.loads(r.content)
+        
+        r = {
+            'StatusCode':r.status_code,
+            'Content': content
+        }
+        
+        # print(f'\napigw formatted response:\n')
+        # pp(r)
+        
+        return content
+
 with open('invoke-url.json','r') as f:
     invoke_url = json.loads(f.read())
 
@@ -143,7 +183,12 @@ cb_input_object = {
     "Input": input_to_be_evaluated_object
 }
 
-s = SimpleControlBrokerClient(
+# s = SimpleAwsControlBrokerClient(
+#     invoke_url = invoke_url,
+#     input_object = cb_input_object
+# )
+
+s = SimpleCrossCloudControlBrokerClient(
     invoke_url = invoke_url,
     input_object = cb_input_object
 )
