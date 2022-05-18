@@ -72,22 +72,11 @@ class SimpleControlBrokerClient():
     
     def __init__(self,*,
         invoke_url,
-        input_bucket,
         input_object:dict,
     ):
         
         self.invoke_url = invoke_url
-        self.input_bucket = input_bucket
         self.input_object = input_object
-        
-        
-    def put_input(self):
-        
-        put = put_object(
-            bucket=self.input_bucket,
-            key='SimpleControlBrokerClient-input.json',
-            object_ = self.input_object
-        )
         
     def invoke_endpoint(self):
         
@@ -128,49 +117,36 @@ with open('invoke-url.json','r') as f:
 
 print(f'invoke_url:\n{invoke_url}\n')
 
-# input_analyzed_path = './input_analyzed/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
-input_analyzed_path = './input_analyzed/ConfigEvent.sqs.queue.json'
+input_to_be_evaluated_path = './input_analyzed/ControlBrokerEvalEngineExampleAppStackSQS.template.json'
+# input_to_be_evaluated_path = './input_analyzed/ConfigEvent.sqs.queue.json'
 
-with open(input_analyzed_path,'r') as f:
-    input_analyzed_object:dict = json.loads(f.read())
-
-input_bucket = 'cschneider-control-broker-utils' # edit bucket policy to allow CB.Reader.RoleArn
-
-input_analyzed = {
-    'Bucket': input_bucket,
-    'Key': input_analyzed_path.split('/')[-1]
-}
-
-put_object(
-    bucket = input_analyzed['Bucket'],
-    key = input_analyzed['Key'],
-    object_ = input_analyzed_object
-)
+with open(input_to_be_evaluated_path,'r') as f:
+    input_to_be_evaluated_object:dict = json.loads(f.read())
 
 cb_input_object = {
     "Context":{
         "EnvironmentEvaluation":"Prod"
     },
-    "Input": input_analyzed
+    "Input": input_to_be_evaluated_object
 }
 
 s = SimpleControlBrokerClient(
     invoke_url = invoke_url,
-    input_bucket = input_bucket,
     input_object = cb_input_object
 )
 
-s.put_input()
 response = s.invoke_endpoint()
 
-raw_bucket = response['Content']['Response']['ResultsReport']['Buckets']['Raw']
+pp(response)
 
-output_handlers = response['Content']['Response']['ResultsReport']['Buckets']['OutputHandlers']
+# raw_bucket = response['Content']['Response']['ResultsReport']['Buckets']['Raw']
 
-result = retry_get_object(
-    # bucket = raw_bucket,
-    bucket = [i['AccessPointArn'] for i in output_handlers if i['HandlerName'] == "CloudFormationOPA"][0],
-    key = response['Content']['Response']['ResultsReport']['Key'],
-)
+# output_handlers = response['Content']['Response']['ResultsReport']['Buckets']['OutputHandlers']
 
-pp(result)
+# result = retry_get_object(
+#     # bucket = raw_bucket,
+#     bucket = [i['AccessPointArn'] for i in output_handlers if i['HandlerName'] == "CloudFormationOPA"][0],
+#     key = response['Content']['Response']['ResultsReport']['Key'],
+# )
+
+# pp(result)
