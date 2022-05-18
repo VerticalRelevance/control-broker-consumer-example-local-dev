@@ -67,6 +67,19 @@ def retry_get_object(*,bucket,key):
             return content
     else:
         print('failed')
+
+def retry_get_presigned(presigned):
+    for i in range(4):
+        r = requests.get(presigned)
+        try:
+            assert r.status_code == 200
+        except AssertionError:
+            print('sleep')
+            sleep(i**2)
+        else:
+            return r.content
+    else:
+        print('failed')
         
 class SimpleControlBrokerClient():
     
@@ -107,10 +120,10 @@ class SimpleControlBrokerClient():
             'Content': content
         }
         
-        print(f'\napigw formatted response:\n')
-        pp(r)
+        # print(f'\napigw formatted response:\n')
+        # pp(r)
         
-        return r
+        return content
 
 with open('invoke-url.json','r') as f:
     invoke_url = json.loads(f.read())
@@ -139,14 +152,14 @@ response = s.invoke_endpoint()
 
 pp(response)
 
-# raw_bucket = response['Content']['Response']['ResultsReport']['Buckets']['Raw']
+raw_presigned = response['ControlBrokerEvaluation']['Raw']['Bucket']
 
-# output_handlers = response['Content']['Response']['ResultsReport']['Buckets']['OutputHandlers']
+raw_result = retry_get_presigned(raw_presigned)
 
-# result = retry_get_object(
-#     # bucket = raw_bucket,
-#     bucket = [i['AccessPointArn'] for i in output_handlers if i['HandlerName'] == "CloudFormationOPA"][0],
-#     key = response['Content']['Response']['ResultsReport']['Key'],
-# )
+pp(raw_result)
 
-# pp(result)
+handled_presigned = response['ControlBrokerEvaluation']['OutputHandlers']['CloudFormationOPA']['Bucket']
+
+handled_result = retry_get_presigned(handled_presigned)
+
+pp(handled_result)
