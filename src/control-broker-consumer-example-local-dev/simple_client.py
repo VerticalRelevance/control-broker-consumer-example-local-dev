@@ -184,15 +184,15 @@ cb_input_object = {
     "Input": input_to_be_evaluated_object
 }
 
-# s = SimpleAwsControlBrokerClient(
-#     invoke_url = invoke_url,
-#     input_object = cb_input_object
-# )
-
-s = SimpleCrossCloudControlBrokerClient(
+s = SimpleAwsControlBrokerClient(
     invoke_url = invoke_url,
     input_object = cb_input_object
 )
+
+# s = SimpleCrossCloudControlBrokerClient(
+#     invoke_url = invoke_url,
+#     input_object = cb_input_object
+# )
 
 response = s.invoke_endpoint()
 
@@ -204,7 +204,7 @@ raw_result = retry_get_presigned(raw_presigned)
 
 pp(raw_result)
 
-handled_presigned = response['Response']['ControlBrokerEvaluation']['OutputHandlers']['CloudFormationOPA']['PresignedUrl']
+handled_presigned = response['Response']['ControlBrokerEvaluation']['OutputHandlers']['OPA']['PresignedUrl']
 
 handled_result = retry_get_presigned(handled_presigned)
 
