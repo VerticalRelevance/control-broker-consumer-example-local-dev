@@ -26,7 +26,7 @@ A simple API client for the [Vertical Relevance Control Broker](https://github.c
 Features
 --------
 
-* TODO
+* This is in progress as a PyPI package that can be installed anywhere to call the [VR Control Broker](https://github.com/VerticalRelevance/control-broker), but for now there is a simple client [here](https://github.com/VerticalRelevance/control-broker-consumer-example-local-dev/blob/main/src/control-broker-consumer-example-local-dev/simple_client.py) that can be used by cloning this repo and running that script.
 
 Credits
 -------
