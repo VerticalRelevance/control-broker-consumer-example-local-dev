@@ -1,4 +1,6 @@
 pprintpp
-boto3
 requests
-aws-requests-auth
+urllib3<2
+black
+boto3
+aws_requests_auth
